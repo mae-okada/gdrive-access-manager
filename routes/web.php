@@ -32,10 +32,53 @@ Route::get('/give-permission', function () {
         $driveService->permissions->create(
             $folderId,
             $permission,
-            ['sendNotificationEmail' => true] // optional: true = user gets email
+            ['sendNotificationEmail' => false] // optional: true = user gets email
         );
 
         return '✅ Editor access granted to inimaeokada@gmail.com!';
+    } catch (\Exception $e) {
+        return '❌ Failed: '.$e->getMessage();
+    }
+});
+
+Route::get('/remove-permission', function () {
+    // Load the service account credentials
+    $client = new GoogleClient;
+    $client->setAuthConfig(storage_path('app/google/service-account.json'));
+    $client->addScope(GoogleDrive::DRIVE);
+
+    // Create the Drive service
+    $driveService = new GoogleDrive($client);
+
+    $folderId = '1KM45PCbg0aDjeRhIIyikLOr6g1PRIJMq'; // ID of target folder or file
+    $targetEmail = 'inimaeokada@gmail.com'; // Email of the user you want to remove access permission
+
+    try {
+        // Get all permissions of the folder
+        $permissions = $driveService
+            ->permissions
+            ->listPermissions(
+                $folderId,
+                [
+                    'fields' => 'permissions(id,emailAddress)',
+                ]
+            );
+
+        // Find the permission ID for the email
+        $permission = collect($permissions->getPermissions())
+            ->first(
+                function ($userPermission) use ($targetEmail) {
+                    return $userPermission->getEmailAddress() === $targetEmail;
+                }
+            );
+
+        if ($permission) {
+            $driveService->permissions->delete($folderId, $permission->getId());
+
+            return "✅ Removed access for $targetEmail";
+        } else {
+            return "❌ No permission found for $targetEmail";
+        }
     } catch (\Exception $e) {
         return '❌ Failed: '.$e->getMessage();
     }
