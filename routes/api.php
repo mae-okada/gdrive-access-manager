@@ -43,7 +43,8 @@ Route::get('/give-permission', function () {
     } catch (\Exception $e) {
         return '❌ Failed: '.$e->getMessage();
     }
-});
+})
+    ->name('drive.permission.assign');
 
 Route::get('/remove-permission', function () {
     // Load the service account credentials
