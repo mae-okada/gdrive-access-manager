@@ -28,6 +28,7 @@ class Member extends Model
     protected $table = 'members';
 
     protected $fillable = [
+        'id',
         'email',
         'name',
         'division',

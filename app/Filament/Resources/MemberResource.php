@@ -4,12 +4,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MemberResource\Pages;
 use App\Models\Member;
+use App\Services\DrivePermissionService;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Log;
 
 class MemberResource extends Resource
 {
@@ -40,6 +44,31 @@ class MemberResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('remove_drive_access')
+                    ->action(function (Member $member) {
+                        try {
+                            app(DrivePermissionService::class)->remove($member);
+
+                            Notification::make()
+                                ->title('Drive access removed successfully!')
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $e) {
+                            // If failed, log the error
+                            Log::error('Failed to remove drive access', [
+                                'member_id' => $member->id,
+                                'member_email' => $member->email,
+                                'error' => $e->getMessage(),
+                            ]);
+
+                            // And show error notification
+                            Notification::make()
+                                ->title('Failed to remove drive access!')
+                                ->body($e->getMessage()) // optional, show reason
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
