@@ -7,9 +7,9 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Project
-
+# About Project
 This project is intended as an example demonstration of 2 features in google API:
-
-- Assign permission access to a google account
 - Remove permission access from a google account
+
+# What to do Next 
+- Assign permission access to a google account
