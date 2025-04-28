@@ -29,7 +29,6 @@ Route::get('/give-permission', function () {
         'type' => 'user',
         'role' => 'writer', // use 'reader' for view only
         'emailAddress' => $email,
-        // 'emailAddress' => 'inimaeokada@gmail.com',
     ]);
 
     try {
