@@ -13,7 +13,6 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Log;
 
 class MemberResource extends Resource
 {
@@ -54,14 +53,6 @@ class MemberResource extends Resource
                                 ->success()
                                 ->send();
                         } catch (\Throwable $e) {
-                            // If failed, log the error
-                            Log::error('Failed to remove drive access', [
-                                'member_id' => $member->id,
-                                'member_email' => $member->email,
-                                'error' => $e->getMessage(),
-                            ]);
-
-                            // And show error notification
                             Notification::make()
                                 ->title('Failed to remove drive access!')
                                 ->body($e->getMessage()) // optional, show reason
