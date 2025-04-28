@@ -8,8 +8,8 @@
 </p>
 
 # About Project
-This project is intended as an example demonstration of 2 features in google API:
-- Remove permission access from a google account
+This project is intended as an example demonstration of:
+- Remove permission access of a google account from G-drive using google API
 
 # What to do Next 
-- Assign permission access to a google account
+- Assign permission access of a google account from G-drive using google API
