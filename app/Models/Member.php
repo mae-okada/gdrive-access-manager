@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Member
- * 
+ *
  * @property int $id
  * @property string $name
  * @property string $email
@@ -20,17 +20,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
- * @package App\Models
  */
 class Member extends Model
 {
-	use SoftDeletes;
-	protected $table = 'members';
+    use SoftDeletes;
 
-	protected $fillable = [
-		'name',
-		'email',
-		'division'
-	];
+    protected $table = 'members';
+
+    protected $fillable = [
+        'email',
+        'name',
+        'division',
+    ];
 }
