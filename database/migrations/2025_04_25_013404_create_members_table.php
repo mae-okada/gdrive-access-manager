@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('members', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name')->index();
             $table->string('email')->index();
-            $table->string('division')->index();
+            $table->string('name')->index()->nullable();
+            $table->string('division')->index()->nullable();
 
             $table->softDeletes();
             $table->timestamps();
