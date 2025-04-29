@@ -27,6 +27,7 @@ class Division extends Model
     protected $table = 'divisions';
 
     protected $fillable = [
+        'id',
         'name',
     ];
 
