@@ -59,7 +59,20 @@ class MemberResource extends Resource
                     ->icon('heroicon-o-user-minus')
                     ->color('info')
                     ->action(function (Member $member) {
-                        $this->removePermission($member);
+                        try {
+                            app(DrivePermissionService::class)->remove($member);
+
+                            Notification::make()
+                                ->title('Drive access removed successfully!')
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title('Failed to remove drive access!')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     }),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -69,7 +82,20 @@ class MemberResource extends Resource
                         ->icon('heroicon-o-user-minus')
                         ->color('info')
                         ->action(function (Member $member) {
-                            $this->removePermission($member);
+                            try {
+                                app(DrivePermissionService::class)->remove($member);
+
+                                Notification::make()
+                                    ->title('Drive access removed successfully!')
+                                    ->success()
+                                    ->send();
+                            } catch (\Throwable $e) {
+                                Notification::make()
+                                    ->title('Failed to remove drive access!')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
                         }),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
@@ -90,23 +116,5 @@ class MemberResource extends Resource
             'create' => Pages\CreateMember::route('/create'),
             'edit' => Pages\EditMember::route('/{record}/edit'),
         ];
-    }
-
-    private function removePermission($member): void
-    {
-        try {
-            app(DrivePermissionService::class)->remove($member);
-
-            Notification::make()
-                ->title('Drive access removed successfully!')
-                ->success()
-                ->send();
-        } catch (\Throwable $e) {
-            Notification::make()
-                ->title('Failed to remove drive access!')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
     }
 }
