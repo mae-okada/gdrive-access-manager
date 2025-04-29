@@ -104,7 +104,7 @@ class MemberResource extends Resource
         } catch (\Throwable $e) {
             Notification::make()
                 ->title('Failed to remove drive access!')
-                ->body($e->getMessage()) // optional, show reason
+                ->body($e->getMessage())
                 ->danger()
                 ->send();
         }
