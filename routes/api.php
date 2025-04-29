@@ -15,14 +15,14 @@ Route::get('/give-permission', function () {
 
     // Load the service account credentials
     $client = new GoogleClient;
-    $client->setAuthConfig(storage_path('app/google/service-account.json'));
+    $client->setAuthConfig(storage_path(config('google.service_account')));
     $client->addScope(GoogleDrive::DRIVE);
 
     // Create the Drive service
     $driveService = new GoogleDrive($client);
 
     // The folder ID you want to share
-    $folderId = '1oIwul6fknh_qMil7xeNToZz3yyFp1VlS';
+    $folderId = config('google.master_folder');
 
     // Create a new permission
     $permission = new GoogleDrivePermission([
@@ -48,13 +48,13 @@ Route::get('/give-permission', function () {
 Route::get('/remove-permission', function () {
     // Load the service account credentials
     $client = new GoogleClient;
-    $client->setAuthConfig(storage_path('app/google/service-account.json'));
+    $client->setAuthConfig(storage_path(config('google.service_account')));
     $client->addScope(GoogleDrive::DRIVE);
 
     // Create the Drive service
     $driveService = new GoogleDrive($client);
 
-    $folderId = '1KM45PCbg0aDjeRhIIyikLOr6g1PRIJMq'; // ID of target folder or file
+    $folderId = config('google.master_folder');
     $targetEmail = 'inimaeokada@gmail.com'; // Email of the user you want to remove access permission
 
     try {

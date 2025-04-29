@@ -51,10 +51,27 @@ class MemberResource extends Resource
             ->groups([
                 'division.name',
             ])
-            // ->defaultGroup('division.name')
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Action::make('assign_drive_access')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('success')
+                    ->action(function (Member $member) {
+                        try {
+                            app(DrivePermissionService::class)->assign($member);
+
+                            Notification::make()
+                                ->title('Drive access assigned successfully!')
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title('Failed to assign drive access!')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
                 Action::make('remove_drive_access')
                     ->icon('heroicon-o-user-minus')
                     ->color('info')
@@ -74,10 +91,28 @@ class MemberResource extends Resource
                                 ->send();
                         }
                     }),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Action::make('assign_drive_access')
+                        ->icon('heroicon-o-user-plus')
+                        ->color('success')
+                        ->action(function (Member $member) {
+                            try {
+                                app(DrivePermissionService::class)->assign($member);
+
+                                Notification::make()
+                                    ->title('Drive access assigned successfully!')
+                                    ->success()
+                                    ->send();
+                            } catch (\Throwable $e) {
+                                Notification::make()
+                                    ->title('Failed to assign drive access!')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
                     Action::make('remove_drive_access')
                         ->icon('heroicon-o-user-minus')
                         ->color('info')

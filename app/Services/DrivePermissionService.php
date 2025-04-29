@@ -2,28 +2,66 @@
 
 namespace App\Services;
 
+use App\Models\Gdrive;
 use App\Models\Member;
 use Google\Client as GoogleClient;
 use Google\Service\Drive as GoogleDrive;
+use Google\Service\Drive\Permission as GoogleDrivePermission;
 use Illuminate\Support\Facades\Log;
 
 class DrivePermissionService
 {
-    public function remove(Member $member): void
+    public function assign(Member $member): void
     {
-        $folderId = '12X-Z1IuzuFJbOd1Uzo_xFcQGFr8WHBc8'; // Target master folder
+        $folderIds = Gdrive::where('division_id', $member->division_id)->pluck('unique_id');
         $targetEmail = $member->email;
 
         $client = new GoogleClient;
-        $client->setAuthConfig(storage_path('app/google/service-account.json'));
+        $client->setAuthConfig(storage_path(config('google.service_account')));
+        $client->addScope(GoogleDrive::DRIVE);
+
+        $driveService = new GoogleDrive($client);
+
+        $permission = new GoogleDrivePermission([
+            'type' => 'user',
+            'role' => 'writer', // use 'reader' for view only
+            'emailAddress' => $targetEmail,
+        ]);
+
+        foreach ($folderIds as $folderId) {
+            try {
+                $driveService->permissions->create(
+                    $folderId,
+                    $permission,
+                    ['sendNotificationEmail' => false] // optional: true = user gets email
+                );
+            } catch (\Throwable $e) {
+                Log::error('Failed to assign drive access permission for target email', [
+                    'member_email' => $targetEmail,
+                    'folder_id' => $folderId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+    }
+
+    public function remove(Member $member): void
+    {
+        $folderId = config('google.master_folder');
+        $targetEmail = $member->email;
+
+        $client = new GoogleClient;
+        $client->setAuthConfig(storage_path(config('google.service_account')));
         $client->addScope(GoogleDrive::DRIVE);
 
         $driveService = new GoogleDrive($client);
 
         try {
-            // Start with the given folder ID and traverse its children
+            // remove access from files & folders inside the master folder
             $this->removePermissionsFromFolder($driveService, $folderId, $targetEmail);
 
+            // remove permission from master folder itself
             $permissions = $driveService
                 ->permissions
                 ->listPermissions(
@@ -32,6 +70,7 @@ class DrivePermissionService
                         'fields' => 'permissions(id,emailAddress)',
                     ]
                 );
+
             $permission = collect($permissions->getPermissions())
                 ->first(
                     function ($userPermission) use ($targetEmail) {
@@ -63,6 +102,27 @@ class DrivePermissionService
 
             foreach ($response->files as $file) {
                 if ($file->mimeType === 'application/vnd.google-apps.folder') {
+                    // It's a folder — first, remove permission
+                    $permissions = $driveService
+                        ->permissions
+                        ->listPermissions(
+                            $file->id,
+                            [
+                                'fields' => 'permissions(id,emailAddress)',
+                            ]
+                        );
+
+                    $permission = collect($permissions->getPermissions())
+                        ->first(
+                            function ($userPermission) use ($targetEmail) {
+                                return $userPermission->getEmailAddress() === $targetEmail;
+                            }
+                        );
+
+                    if ($permission) {
+                        $driveService->permissions->delete($file->id, $permission->getId());
+                    }
+
                     // It's a folder — recurse into it
                     $this->removePermissionsFromFolder($driveService, $file->id, $targetEmail);
                 } else {
